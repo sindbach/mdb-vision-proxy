@@ -42,7 +42,7 @@ func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResp
 	}
 	fmt.Printf("%v\n", bodyInput)
 	fmt.Println("Connecting ...")
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(bodyInput.URI))
 	if err != nil {
