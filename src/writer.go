@@ -45,7 +45,10 @@ func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResp
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(bodyInput.URI))
-
+	if err != nil {
+		fmt.Println(fmt.Sprintf("Failed to connect: [%s]", err.Error()))
+		return &events.APIGatewayProxyResponse{Body: err.Error(), StatusCode: 500}, nil
+	}
 	collection := client.Database(bodyInput.DBName).Collection(bodyInput.CollName)
 
 	results := []string{}
