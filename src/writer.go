@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -20,15 +21,9 @@ type BodyResponse struct {
 
 // BodyInput is the input
 type BodyInput struct {
-	Docs     []Doc  `json:"docs"`
-	URI      string `json:"uri"`
-	DBName   string `json:"dbname"`
-	CollName string `json:"collname"`
-}
-
-// Doc is a struct for a document
-type Doc struct {
-	Key string
+	Doc       map[string]interface{} `json:"docs"`
+	URI       string                 `json:"uri"`
+	Namespace string                 `json:"namespace"`
 }
 
 func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResponse, error) {
@@ -49,14 +44,13 @@ func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResp
 		fmt.Println(fmt.Sprintf("Failed to connect: [%s]", err.Error()))
 		return &events.APIGatewayProxyResponse{Body: err.Error(), StatusCode: 500}, nil
 	}
-	collection := client.Database(bodyInput.DBName).Collection(bodyInput.CollName)
+	parts := strings.Split(bodyInput.Namespace, ".")
+	collection := client.Database(parts[0]).Collection(parts[1])
 
 	results := []string{}
-	for _, v := range bodyInput.Docs {
-		insertResult, _ := collection.InsertOne(context.TODO(), v)
-		fmt.Println(insertResult.InsertedID)
-		results = append(results, fmt.Sprintf("%v", insertResult.InsertedID))
-	}
+	insertResult, _ := collection.InsertOne(context.TODO(), bodyInput.Doc)
+	fmt.Println(insertResult.InsertedID)
+	results = append(results, fmt.Sprintf("%v", insertResult.InsertedID))
 
 	fmt.Println(results)
 	stringResult := fmt.Sprintf("%v", results)
