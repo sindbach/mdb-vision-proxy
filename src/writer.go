@@ -21,9 +21,15 @@ type BodyResponse struct {
 
 // BodyInput is the input
 type BodyInput struct {
-	Doc       map[string]interface{} `json:"docs"`
-	URI       string                 `json:"uri"`
-	Namespace string                 `json:"namespace"`
+	Docs      []Doc  `json:"docs"`
+	URI       string `json:"uri"`
+	Namespace string `json:"namespace"`
+}
+
+// Doc is the document
+type Doc struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
 }
 
 func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResponse, error) {
@@ -48,10 +54,11 @@ func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResp
 	collection := client.Database(parts[0]).Collection(parts[1])
 
 	results := []string{}
-	insertResult, _ := collection.InsertOne(context.TODO(), bodyInput.Doc)
-	fmt.Println(insertResult.InsertedID)
-	results = append(results, fmt.Sprintf("%v", insertResult.InsertedID))
-
+	for _, v := range bodyInput.Docs {
+		insertResult, _ := collection.InsertOne(context.TODO(), v)
+		fmt.Println(insertResult.InsertedID)
+		results = append(results, fmt.Sprintf("%v", insertResult.InsertedID))
+	}
 	fmt.Println(results)
 	stringResult := fmt.Sprintf("%v", results)
 	response := BodyResponse{Output: stringResult}
