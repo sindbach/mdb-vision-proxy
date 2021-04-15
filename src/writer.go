@@ -56,7 +56,6 @@ func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResp
 	results := []string{}
 	for _, v := range bodyInput.Docs {
 		insertResult, _ := collection.InsertOne(context.TODO(), v)
-		fmt.Println(insertResult.InsertedID)
 		results = append(results, fmt.Sprintf("%v", insertResult.InsertedID))
 	}
 	fmt.Println(results)
